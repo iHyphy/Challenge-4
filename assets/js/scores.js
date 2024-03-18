@@ -1,29 +1,32 @@
-function printHighscores() {
-  // either get scores from localstorage or set to empty array
-  var highscores = JSON.parse(window.localStorage.getItem('highscores')) || [];
+var HighscoreManager = (function() {
+  function printHighscores() {
+    var highscores = JSON.parse(window.localStorage.getItem('highscores')) || [];
+    highscores.sort(function(a, b) {
+      return b.score - a.score;
+    });
 
-  // sort highscores by score property in descending order
-  highscores.sort(function (a, b) {
-    return b.score - a.score;
-  });
-
-  for (var i = 0; i < highscores.length; i += 1) {
-    // create li tag for each high score
-    var liTag = document.createElement('li');
-    liTag.textContent = highscores[i].initials + ' - ' + highscores[i].score;
-
-    // display on page
     var olEl = document.getElementById('highscores');
-    olEl.appendChild(liTag);
+    olEl.innerHTML = ''; // Clear existing entries
+
+    for (var i = 0; i < highscores.length; i += 1) {
+      var liTag = document.createElement('li');
+      liTag.textContent = highscores[i].initials + ' - ' + highscores[i].score;
+      olEl.appendChild(liTag);
+    }
   }
-}
 
-function clearHighscores() {
-  window.localStorage.removeItem('highscores');
-  window.location.reload();
-}
+  function clearHighscores() {
+    window.localStorage.removeItem('highscores');
+    printHighscores(); // Update UI after clearing
+  }
 
-document.getElementById('clear').onclick = clearHighscores;
+  document.getElementById('clear').addEventListener('click', clearHighscores);
 
-// run function when page loads
-printHighscores();
+  // Expose the printHighscores function to be accessible from outside
+  return {
+    printHighscores: printHighscores
+  };
+})();
+
+// Run printHighscores when the page loads
+document.addEventListener('DOMContentLoaded', HighscoreManager.printHighscores);
